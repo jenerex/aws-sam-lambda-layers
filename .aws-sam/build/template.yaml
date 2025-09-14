@@ -1,0 +1,145 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Auth API: Cognito + API Gateway + Lambda (TypeScript) - DocumentDB external'
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 15
+    MemorySize: 256
+    Environment:
+      Variables:
+        NODE_ENV: prod
+Parameters:
+  MongoUriParam:
+    Type: String
+    Description: MongoDB/DocumentDB connection string (e.g. from Secrets Manager)
+  AllowedOrigin:
+    Type: String
+    Default: '*'
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: auth-user-pool
+      AutoVerifiedAttributes:
+      - email
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: auth-client
+      GenerateSecret: false
+      UserPoolId:
+        Ref: UserPool
+      ExplicitAuthFlows:
+      - ADMIN_NO_SRP_AUTH
+      - USER_PASSWORD_AUTH
+  AuthApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowOrigin: '''*'''
+        AllowMethods: '''OPTIONS,GET,POST'''
+        AllowHeaders: '''Content-Type,Authorization'''
+      DefinitionBody:
+        swagger: '2.0'
+        info:
+          title: Auth API
+        securityDefinitions:
+          CognitoAuthorizer:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-authtype: cognito_user_pools
+            x-amazon-apigateway-authorizer:
+              type: cognito_user_pools
+              providerARNs:
+              - Fn::GetAtt:
+                - UserPool
+                - Arn
+        paths:
+          /signup:
+            post:
+              parameters:
+              - in: body
+                name: body
+                required: true
+                schema:
+                  type: object
+                  required:
+                  - email
+                  - password
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    password:
+                      type: string
+                      minLength: 6
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignupFunction.Arn}/invocations
+                httpMethod: POST
+                type: aws_proxy
+          /home:
+            get:
+              security:
+              - CognitoAuthorizer: []
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HomeFunction.Arn}/invocations
+                httpMethod: GET
+                type: aws_proxy
+  SignupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: auth-signup
+      Handler: dist/handlers/auth.signup
+      CodeUri: SignupFunction
+      Events:
+        Signup:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: AuthApi
+            Path: /signup
+            Method: post
+      Environment:
+        Variables:
+          COGNITO_CLIENT_ID:
+            Ref: UserPoolClient
+          MONGO_URI:
+            Ref: MongoUriParam
+    Metadata:
+      SamResourceId: SignupFunction
+  HomeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: auth-home
+      Handler: dist/handlers/auth.home
+      CodeUri: HomeFunction
+      Events:
+        Home:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: AuthApi
+            Path: /home
+            Method: get
+      Environment:
+        Variables:
+          MONGO_URI:
+            Ref: MongoUriParam
+    Metadata:
+      SamResourceId: HomeFunction
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint
+    Value:
+      Fn::Sub: https://${AuthApi}.execute-api.${AWS::Region}.amazonaws.com/prod
+  UserPoolId:
+    Value:
+      Ref: UserPool
+  UserPoolClientId:
+    Value:
+      Ref: UserPoolClient
