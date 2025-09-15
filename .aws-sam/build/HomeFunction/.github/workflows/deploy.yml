@@ -16,7 +16,16 @@ jobs:
         with:
           node-version: 18
 
-      # 1. Install everything (prod + dev)
+      # Cache node_modules to speed up CI
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 1. Install all dependencies (for build)
       - name: Install all dependencies
         run: npm ci
 
@@ -24,10 +33,11 @@ jobs:
       - name: Build
         run: npm run build
 
-
-      # 4. Copy prod node_modules into dist/ so Lambda has them
-      - name: Copy node_modules into dist
-        run: cp -r node_modules dist/
+      # 3. Install only production dependencies in dist for Lambda
+      - name: Install production dependencies in dist
+        run: |
+          cd dist
+          npm install --production
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -36,9 +46,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
 
+      # 4. Download global-bundle.pem
       - name: Download global-bundle.pem
         run: curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o dist/global-bundle.pem
 
+      # 5. Package and deploy with SAM
       - name: Package and deploy with SAM
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
