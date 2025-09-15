@@ -18,7 +18,7 @@ const signup = async (event) => {
         await (0, db_service_1.initDb)(MONGO_URI);
         console.log('db initialized');
         const users = await (0, db_service_1.getCollection)("users");
-        const existing = await users.findOne({ email });
+        const existing = await users.findOne({ email }); 
         if (existing)
             return (0, response_1.failure)("User exists", 409);
         await (0, auth_service_1.signUp)(COGNITO_CLIENT_ID, email, password);
