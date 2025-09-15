@@ -46,4 +46,5 @@ jobs:
             --template-file packaged.yaml \
             --stack-name auth-app-prod-v2 \
             --capabilities CAPABILITY_IAM \
+            --region ap-south-1 \
             --parameter-overrides MongoUriParam="${MONGO_URI}"
