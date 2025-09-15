@@ -44,6 +44,6 @@ jobs:
           
           sam deploy \
             --template-file packaged.yaml \
-            --stack-name auth-app-prod \
+            --stack-name auth-app-prod-v2 \
             --capabilities CAPABILITY_IAM \
             --parameter-overrides MongoUriParam="${MONGO_URI}"
