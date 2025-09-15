@@ -24,7 +24,7 @@ jobs:
 
       # 4. Build TypeScript -> dist/
       - name: Build
-        run: npm run build
+        run: npm run build 
 
       # 5. Install only production dependencies inside dist for Lambda
       - name: Install production dependencies in Lambda folder
