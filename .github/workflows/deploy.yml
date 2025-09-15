@@ -19,6 +19,9 @@ jobs:
       - name: Install deps
         run: npm ci --only=production
 
+      - name: Install dev deps
+        run: npm install typescript @types/node --save-dev
+
       - name: Build
         run: npm run build
 
