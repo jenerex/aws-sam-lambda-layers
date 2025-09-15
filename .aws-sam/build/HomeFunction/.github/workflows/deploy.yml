@@ -18,7 +18,7 @@ jobs:
 
       # 1. Install everything (prod + dev)
       - name: Install all dependencies
-        run: npm install
+        run: npm ci
 
       # 2. Build TypeScript -> dist/
       - name: Build
