@@ -24,11 +24,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      # 3. Clean up and keep only prod deps
-      - name: Install prod-only dependencies 
-        run: |
-          rm -rf node_modules
-          npm ci --only=production
 
       # 4. Copy prod node_modules into dist/ so Lambda has them
       - name: Copy node_modules into dist
