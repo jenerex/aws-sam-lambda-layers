@@ -111,7 +111,7 @@ Resources:
             Method: post
       Environment:
         Variables:
-          COGNITO_CLIENT_ID: !Ref UserPoolClient
+          COGNITO_CLIENT_ID: !Ref UserPoolClient 
           MONGO_URI: !Ref MongoUriParam
 
   HomeFunction:
