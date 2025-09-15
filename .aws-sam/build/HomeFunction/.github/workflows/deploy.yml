@@ -16,53 +16,22 @@ jobs:
         with:
           node-version: 18
 
-      # Cache node_modules to speed up CI
-      - name: Cache Node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      # 1. Install all dependencies (for build)
-      - name: Install all dependencies
+      - name: Install deps
         run: npm ci
 
-      # 2. Build TypeScript -> dist/
       - name: Build
         run: npm run build
-
-      # 3. Install only production dependencies in dist for Lambda
-      - name: Install production dependencies in dist
-        run: |
-          cd dist
-          npm install --production
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }} # or use AWS keys
+          role-session-name: github-actions
 
-      # 4. Download global-bundle.pem
-      - name: Download global-bundle.pem
-        run: curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o dist/global-bundle.pem
-
-      # 5. Package and deploy with SAM
       - name: Package and deploy with SAM
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
         run: |
-          sam package \
-            --template-file template.yaml \
-            --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} \
-            --output-template-file packaged.yaml
-          
-          sam deploy \
-            --template-file packaged.yaml \
-            --stack-name auth-app-prod-v2 \
-            --capabilities CAPABILITY_IAM \
-            --region ap-south-1 \
-            --parameter-overrides MongoUriParam="${MONGO_URI}"
+          sam package --template-file template.yaml --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} --output-template-file packaged.yaml
+          sam deploy --template-file packaged.yaml --stack-name auth-app-prod --capabilities CAPABILITY_IAM --parameter-overrides MongoUriParam=${MONGO_URI}
