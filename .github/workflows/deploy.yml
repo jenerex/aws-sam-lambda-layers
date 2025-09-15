@@ -26,13 +26,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Prune dev deps before packaging
-      - name: Remove dev dependencies
-        run: npm prune --production 
-
-      - name: Build
-        run: npm run build
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
