@@ -8,26 +8,35 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest 
     steps:
+      # 1. Checkout code
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2. Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-         # Install everything so build works
+      # 3. Install all dependencies (including dev) for build
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
+      # 4. Build TypeScript -> dist/
       - name: Build
         run: npm run build
 
-      # remove dev dependencies to reduce package size
+      # 5. Install only production dependencies inside dist for Lambda
+      - name: Install production dependencies in Lambda folder
+        run: |
+          cd dist
+          npm install --production
 
-      - name: Remove dev dependencies
-        run: npm prune --production 
+      # 6. Clean old SAM build artifacts
+      - name: Clean SAM build
+        run: rm -rf .aws-sam/build
 
+      # 7. Configure AWS credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -35,10 +44,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
 
-      # Download global-bundle.pem so it's included in the Lambda package
+      # 8. Download global-bundle.pem into Lambda folder
       - name: Download global-bundle.pem
-        run: curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o src/global-bundle.pem
+        run: curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o dist/global-bundle.pem
 
+      # 9. Package and deploy with SAM
       - name: Package and deploy with SAM
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
