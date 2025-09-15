@@ -29,6 +29,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
 
+      # Download global-bundle.pem so it's included in the Lambda package
+      - name: Download global-bundle.pem
+        run: curl https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o src/global-bundle.pem
+
       - name: Package and deploy with SAM
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
@@ -42,4 +46,4 @@ jobs:
             --template-file packaged.yaml \
             --stack-name auth-app-prod \
             --capabilities CAPABILITY_IAM \
-            --parameter-overrides MongoUriParam=${MONGO_URI}
+            --parameter-overrides MongoUriParam="${MONGO_URI}"
