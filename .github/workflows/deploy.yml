@@ -18,8 +18,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
 
+      # Manually clean before build since --clean isn’t available
+      - name: Clean previous SAM build
+        run: rm -rf .aws-sam
+
       - name: Build with SAM
-        run: sam build --use-container --clean
+        run: sam build --use-container
 
       - name: Deploy with SAM
         run: |
