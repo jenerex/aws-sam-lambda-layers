@@ -11,14 +11,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {    
-    "mongodb": "^6.19.0"
+    "mongodb": "^6.19.0",
+    "aws-sdk": "^2.1692.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.152",
     "@types/node": "^24.3.1",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.2",
-    "aws-sdk": "^2.1692.0"
+    "typescript": "^5.9.2"
   }
 }

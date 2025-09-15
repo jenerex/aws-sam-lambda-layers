@@ -16,11 +16,16 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install deps
-        run: npm ci --only=production
+         # Install everything so build works
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Install dev deps
-        run: npm install typescript @types/node --save-dev
+      - name: Build
+        run: npm run build
+
+      # Prune dev deps before packaging
+      - name: Remove dev dependencies
+        run: npm prune --production 
 
       - name: Build
         run: npm run build
