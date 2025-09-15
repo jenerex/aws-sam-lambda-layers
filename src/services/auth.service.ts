@@ -2,7 +2,7 @@ import * as AWS from "aws-sdk";
 
 const cognito = new AWS.CognitoIdentityServiceProvider();
 
-function isOffline() {
+function isOffline() { 
   return process.env.IS_OFFLINE === "true" || process.env.NODE_ENV === "development";
 }
 
