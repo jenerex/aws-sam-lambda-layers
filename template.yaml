@@ -39,13 +39,13 @@ Resources:
         - ADMIN_NO_SRP_AUTH
         - USER_PASSWORD_AUTH
 
-  # API Gateway
+  # API Gateway (Swagger) with request schemas
   AuthApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: prod
       Cors:
-        AllowOrigin: "'*'"
+        AllowOrigin: "'*'"        # ✅ corrected
         AllowMethods: "'OPTIONS,GET,POST'"
         AllowHeaders: "'Content-Type,Authorization'"
       DefinitionBody:
@@ -95,13 +95,13 @@ Resources:
                 httpMethod: GET
                 type: aws_proxy
 
-  # Lambda: Signup
+  # Lambda functions
   SignupFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: auth-signup
       Handler: dist/handlers/auth.signup
-      CodeUri: dist/   # ✅ only ship built code + copied node_modules
+      CodeUri: .
       Events:
         Signup:
           Type: Api
@@ -114,13 +114,12 @@ Resources:
           COGNITO_CLIENT_ID: !Ref UserPoolClient
           MONGO_URI: !Ref MongoUriParam
 
-  # Lambda: Home
   HomeFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: auth-home
-      Handler: dist/handlers/home.home
-      CodeUri: dist/   # ✅ same optimization here
+      Handler: dist/handlers/auth.home
+      CodeUri: .
       Events:
         Home:
           Type: Api
