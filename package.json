@@ -1,24 +1,10 @@
 {
-  "name": "nodejs-lambda-app",
+  "name": "basic-lambda",
   "version": "1.0.0",
+  "description": "Minimal Lambda function",
   "main": "index.js",
   "scripts": {
-    "build": "npx tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo 'No build step required'"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {    
-    "mongodb": "^6.19.0"
-  },
-  "devDependencies": {
-    "@types/aws-lambda": "^8.10.152",
-    "@types/node": "^24.3.1",
-    "ts-node": "^10.9.2",
-    "tsc-alias": "^1.8.16",
-    "typescript": "^5.9.2",
-    "aws-sdk": "^2.1692.0"
-  }
+  "license": "MIT"
 }
