@@ -24,7 +24,7 @@ Resources:
     Properties:
       LayerName: node-modules-layer
       Description: "Common npm dependencies (mongodb, aws-sdk, etc.)"
-      ContentUri: layers/nodejs
+      ContentUri: layers/
       CompatibleRuntimes:
         - nodejs18.x
       RetentionPolicy: Delete
