@@ -38,6 +38,8 @@ jobs:
           cp package.json package-lock.json layers/nodejs/
           cd layers/nodejs
           npm ci --only=production
+          cd ../..
+          rm -rf node_modules   # <-- remove project node_modules after layer is ready
 
       # Clean previous SAM build
       - name: Clean previous SAM build
