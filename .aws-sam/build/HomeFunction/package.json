@@ -1,0 +1,21 @@
+{
+  "name": "basic-lambda",
+  "version": "1.0.0",
+  "description": "Minimal Lambda function",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "prepare-layer": "cd layers/nodejs && npm install --only=production"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1572.0",  
+    "mongodb": "^6.8.0"      
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/aws-lambda": "^8.10.144",
+    "@types/node": "^20.6.1",
+    "@types/mongodb": "^4.0.7"   
+  },
+  "license": "MIT"
+}

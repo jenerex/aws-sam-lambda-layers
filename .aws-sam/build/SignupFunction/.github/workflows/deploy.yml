@@ -38,11 +38,8 @@ jobs:
           cp package.json package-lock.json layers/nodejs/
           cd layers/nodejs
           npm ci --only=production
-
-      # Remove deps from function source (only dist/ remains)
-      - name: Clean function source
-        run: |
-          rm -rf node_modules package.json package-lock.json
+          cd ../..
+          rm -rf node_modules   # <-- remove project node_modules after layer is ready
 
       # Clean previous SAM build
       - name: Clean previous SAM build

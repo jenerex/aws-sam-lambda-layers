@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "Auth API with Layers"
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 10
+    MemorySize: 128
+
+Parameters:
+  MongoUriParam:
+    Type: String
+    Description: MongoDB connection string
+
+  CognitoClientIdParam:
+    Type: String
+    Description: Cognito App Client ID
+
+Resources:
+  # Shared Node.js dependencies layer
+  NodeModulesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: node-modules-layer
+      Description: "Common npm dependencies (mongodb, aws-sdk, etc.)"
+      ContentUri: layers/nodejs
+      CompatibleRuntimes:
+        - nodejs18.x
+      RetentionPolicy: Delete
+
+  ServerlessRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS,GET,POST'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  SignupFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      FunctionName: auth-signup
+      Handler: dist/handlers/auth.signup
+      CodeUri: .
+      Layers:
+        - !Ref NodeModulesLayer
+      Events:
+        Signup:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ServerlessRestApi
+            Path: /signup
+            Method: post
+      Environment:
+        Variables:
+          MONGO_URI: !Ref MongoUriParam
+          COGNITO_CLIENT_ID: !Ref CognitoClientIdParam
+
+  HomeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: auth-home
+      Handler: dist/handlers/auth.home
+      CodeUri: .
+      Layers:
+        - !Ref NodeModulesLayer
+      Events:
+        Home:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ServerlessRestApi
+            Path: /home
+            Method: get
+      Environment:
+        Variables:
+          MONGO_URI: !Ref MongoUriParam
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
