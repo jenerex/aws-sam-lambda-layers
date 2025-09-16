@@ -14,7 +14,7 @@ Resources:
     Properties:
       FunctionName: hello-world
       CodeUri: .
-      Handler: index.handler
+      Handler: src/handlers/index.handler
       Events:
         ApiEvent:
           Type: Api
