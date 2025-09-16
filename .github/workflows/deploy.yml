@@ -11,7 +11,7 @@
 
 - name: Package with SAM
   run: |
-    sam package \
+    sam package \ 
       --template-file template.yaml \
       --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} \
       --output-template-file packaged.yaml
