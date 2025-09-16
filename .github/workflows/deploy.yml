@@ -76,5 +76,5 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides \
-              MongoUriParam="${MONGO_URI}" \
+              MongoUriParam="${MONGO_URI}" \ 
               CognitoClientIdParam="${COGNITO_CLIENT_ID}"
