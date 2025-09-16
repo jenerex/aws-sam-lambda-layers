@@ -7,19 +7,15 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout source
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Setup Node.js
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Configure AWS 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -27,30 +23,40 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
 
-      # Install ALL dependencies (including dev) for build
+      - name: Prune workspace before SAM build
+        run: |
+          rm -rf node_modules
+          rm -rf src
+          rm -rf tests
+          rm -rf .git
+          ls -lh
+
+      # Install all dependencies for build (including dev)
       - name: Install dependencies
         run: npm ci
 
-      # Compile TypeScript → dist/
+      # Build TypeScript into dist/
       - name: Build TypeScript
         run: npx tsc
 
-      # Prepare Lambda Layer with only production deps
+      # Prepare Lambda Layer (prod dependencies only)
       - name: Install dependencies in Lambda Layer
         run: |
           mkdir -p layers/nodejs
           cp package.json package-lock.json layers/nodejs/
           cd layers/nodejs
           npm ci --only=production
-          cd ../..
-          # remove root node_modules to avoid bundling twice
-          rm -rf node_modules
 
-      # Clean previous SAM build artifacts
+      # Remove deps from function source (only dist/ remains)
+      - name: Clean function source
+        run: |
+          rm -rf node_modules package.json package-lock.json
+
+      # Clean previous SAM build
       - name: Clean previous SAM build
         run: rm -rf .aws-sam
 
-      # SAM Build (only dist/ code packaged, node_modules in Layer)
+      # Build SAM project
       - name: Build with SAM
         run: sam build --use-container
 
