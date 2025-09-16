@@ -69,8 +69,8 @@ jobs:
           sam deploy \
             --template-file packaged.yaml \
             --stack-name auth-app-prod-v3 \
-            --capabilities CAPABILITY_IAM \ 
-            --region ap-south-1 \ 
+            --capabilities CAPABILITY_IAM \
+            --region ap-south-1 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides \
