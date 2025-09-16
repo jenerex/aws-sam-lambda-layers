@@ -13,6 +13,10 @@ Parameters:
     Type: String
     Description: MongoDB connection string
 
+  CognitoClientIdParam:
+    Type: String
+    Description: Cognito App Client ID
+
 Resources:
   # Shared Node.js dependencies layer
   NodeModulesLayer:
@@ -72,11 +76,6 @@ Resources:
       Environment:
         Variables:
           MONGO_URI: !Ref MongoUriParam
-
-Parameters:
-  CognitoClientIdParam:
-    Type: String
-    Description: Cognito App Client ID
 
 Outputs:
   ApiUrl:

@@ -39,7 +39,6 @@ jobs:
           cd layers/nodejs
           npm ci --only=production
 
-
       # Clean previous SAM build
       - name: Clean previous SAM build
         run: rm -rf .aws-sam
@@ -60,6 +59,7 @@ jobs:
       - name: Deploy with SAM
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
+          COGNITO_CLIENT_ID: ${{ secrets.COGNITO_CLIENT_ID }}
         run: |
           sam deploy \
             --template-file packaged.yaml \
@@ -68,4 +68,6 @@ jobs:
             --region ap-south-1 \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --parameter-overrides MongoUriParam="${MONGO_URI}"
+            --parameter-overrides \
+              MongoUriParam="${MONGO_URI}" \
+              CognitoClientIdParam="${COGNITO_CLIENT_ID}"
