@@ -42,7 +42,7 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       FunctionName: auth-signup
-      Handler: dist/handlers/auth.signup
+      Handler: handlers/auth.signup
       CodeUri: dist/
       Layers:
         - !Ref NodeModulesLayer
@@ -62,7 +62,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: auth-home
-      Handler: dist/handlers/auth.home
+      Handler: handlers/auth.home
       CodeUri: dist/ 
       Layers:
         - !Ref NodeModulesLayer
