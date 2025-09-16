@@ -19,10 +19,11 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: node-modules-layer
-      Description: "Common npm dependencies (mongodb, cognito libs, etc.)"
+      Description: "Common npm dependencies (mongodb, aws-sdk, etc.)"
       ContentUri: layers/nodejs
       CompatibleRuntimes:
         - nodejs18.x
+      RetentionPolicy: Delete
 
   ServerlessRestApi:
     Type: AWS::Serverless::Api
@@ -51,6 +52,7 @@ Resources:
       Environment:
         Variables:
           MONGO_URI: !Ref MongoUriParam
+          COGNITO_CLIENT_ID: !Ref CognitoClientIdParam
 
   HomeFunction:
     Type: AWS::Serverless::Function
@@ -70,6 +72,11 @@ Resources:
       Environment:
         Variables:
           MONGO_URI: !Ref MongoUriParam
+
+Parameters:
+  CognitoClientIdParam:
+    Type: String
+    Description: Cognito App Client ID
 
 Outputs:
   ApiUrl:
