@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: "Basic Auth API with Hello, Signup and Home functions"
+Description: "Basic Auth API with Hello, Signup and Home functions using Lambda Layers"
 
 Globals:
   Function:
@@ -14,7 +14,17 @@ Parameters:
     Description: MongoDB connection string
 
 Resources:
-  # Define the API Gateway explicitly (so we can set stage + CORS)
+  # Lambda Layer for dependencies
+  NodeModulesLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: node-modules-layer
+      Description: "Shared Node.js dependencies for all Lambdas"
+      ContentUri: layers/nodejs
+      CompatibleRuntimes:
+        - nodejs18.x
+
+  # Define API Gateway explicitly (so we can set stage + CORS)
   ServerlessRestApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -31,6 +41,8 @@ Resources:
       FunctionName: auth-signup
       Handler: dist/handlers/auth.signup
       CodeUri: .
+      Layers:
+        - !Ref NodeModulesLayer
       Events:
         Signup:
           Type: Api
@@ -49,6 +61,8 @@ Resources:
       FunctionName: auth-home
       Handler: dist/handlers/auth.home
       CodeUri: .
+      Layers:
+        - !Ref NodeModulesLayer
       Events:
         Home:
           Type: Api

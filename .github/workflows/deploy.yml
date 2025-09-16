@@ -18,6 +18,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }} 
           aws-region: ap-south-1
 
+      # Prepare Lambda Layer
+      - name: Install dependencies in Lambda Layer
+        run: |
+          mkdir -p layers/nodejs
+          cp package.json package-lock.json layers/nodejs/
+          cd layers/nodejs
+          npm install --only=production
+
       # Clean SAM build cache
       - name: Clean previous SAM build
         run: rm -rf .aws-sam
