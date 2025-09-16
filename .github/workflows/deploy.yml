@@ -30,6 +30,8 @@ jobs:
           sam deploy \
             --stack-name basic-lambda \
             --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} \
+            --template-file packaged.yaml \
+            --stack-name auth-app-prod-v3 \
             --capabilities CAPABILITY_IAM \
             --region ap-south-1 \
             --no-confirm-changeset \
