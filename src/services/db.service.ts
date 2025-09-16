@@ -6,6 +6,7 @@ let db: Db | undefined;
 
 export async function initDb(mongoUri: string) {
   if (client && db) return db;
+  log("Connecting to mongo url:", mongoUri);
   client = new MongoClient(mongoUri);
   await client.connect();
   db = client.db("mydb");

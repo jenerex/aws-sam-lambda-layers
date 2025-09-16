@@ -20,7 +20,7 @@ export const signup: APIGatewayProxyHandler = async (event) => {
     const { email, password } = body;
 
     if (!email || !password) {
-      return failure("email and password required", 400);
+      return failure("email and password required", 400); 
     }
 
     await initDb(MONGO_URI);
