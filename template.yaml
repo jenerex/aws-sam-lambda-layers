@@ -97,7 +97,7 @@ Resources:
 
   # Lambda functions
   SignupFunction:
-    Type: AWS::Serverless::Function
+    Type: AWS::Serverless::Function 
     Properties:
       FunctionName: auth-signup
       Handler: dist/handlers/auth.signup 
