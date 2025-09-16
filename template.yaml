@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: "Basic Hello World Lambda with API Gateway"
+Description: "Basic Auth API with Hello, Signup and Home functions"
 
 Globals:
   Function:
@@ -8,7 +8,23 @@ Globals:
     Timeout: 5
     MemorySize: 128
 
+Parameters:
+  MongoUriParam:
+    Type: String
+    Description: MongoDB connection string
+
 Resources:
+  # Define the API Gateway explicitly (so we can set stage + CORS)
+  ServerlessRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS,GET,POST'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
+  # Hello Lambda
   HelloWorldFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -23,81 +39,25 @@ Resources:
             Path: /hello
             Method: get
 
-  # Define the API Gateway explicitly (so we can set stage + CORS)
-  ServerlessRestApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: prod
-      Cors:
-        AllowMethods: "'OPTIONS,GET'"
-        AllowHeaders: "'Content-Type,Authorization'"
-        AllowOrigin: "'*'"
-      DefinitionBody:
-        swagger: "2.0"
-        info:
-          title: Auth API
-        securityDefinitions:
-          CognitoAuthorizer:
-            type: "apiKey"
-            name: "Authorization"
-            in: "header"
-            x-amazon-authtype: "cognito_user_pools"
-            x-amazon-apigateway-authorizer:
-              type: "cognito_user_pools"
-              providerARNs:
-                - !GetAtt UserPool.Arn
-        paths:
-          /signup:
-            post:
-              parameters:
-                - in: body
-                  name: body
-                  required: true
-                  schema:
-                    type: object
-                    required: [email,password]
-                    properties:
-                      email:
-                        type: string
-                        format: email
-                      password:
-                        type: string
-                        minLength: 6
-              x-amazon-apigateway-integration:
-                uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SignupFunction.Arn}/invocations
-                httpMethod: POST
-                type: aws_proxy
-
-          /home:
-            get:
-              security:
-                - CognitoAuthorizer: []
-              x-amazon-apigateway-integration:
-                uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HomeFunction.Arn}/invocations
-                httpMethod: GET
-                type: aws_proxy
-
-  # Lambda functions
+  # Signup Lambda
   SignupFunction:
     Type: AWS::Serverless::Function 
     Properties:
       FunctionName: auth-signup
-      Handler: dist/handlers/auth.signup 
+      Handler: dist/handlers/auth.signup
       CodeUri: .
       Events:
         Signup:
           Type: Api
           Properties:
-            RestApiId: !Ref AuthApi
+            RestApiId: !Ref ServerlessRestApi
             Path: /signup
             Method: post
       Environment:
         Variables:
-          COGNITO_CLIENT_ID: !Ref UserPoolClient
           MONGO_URI: !Ref MongoUriParam
 
+  # Home Lambda
   HomeFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -108,7 +68,7 @@ Resources:
         Home:
           Type: Api
           Properties:
-            RestApiId: !Ref AuthApi
+            RestApiId: !Ref ServerlessRestApi
             Path: /home
             Method: get
       Environment:
@@ -117,5 +77,5 @@ Resources:
 
 Outputs:
   ApiUrl:
-    Description: "Hello World API endpoint"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/hello"
+    Description: "API Gateway endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod"
