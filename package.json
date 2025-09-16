@@ -4,8 +4,9 @@
   "description": "Minimal Lambda function",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
-  },
+      "build": "tsc",
+      "prepare-layer": "cd layers/nodejs && npm install --only=production"
+    },
   "devDependencies": {
     "typescript": "^5.9.2",
     "@types/aws-lambda": "^8.10.144",

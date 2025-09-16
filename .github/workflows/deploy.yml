@@ -37,7 +37,8 @@ jobs:
           mkdir -p layers/nodejs
           cp package.json package-lock.json layers/nodejs/
           cd layers/nodejs
-          npm install --only=production
+          npm ci --only=production
+
 
       # Clean previous SAM build
       - name: Clean previous SAM build
