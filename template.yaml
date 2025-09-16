@@ -100,7 +100,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: auth-signup
-      Handler: dist/handlers/auth.signup
+      Handler: dist/handlers/auth.signup 
       CodeUri: .
       Events:
         Signup:
