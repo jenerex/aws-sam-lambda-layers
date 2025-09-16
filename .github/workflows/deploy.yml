@@ -50,10 +50,6 @@ jobs:
       - name: Clean previous SAM build
         run: rm -rf .aws-sam
 
-      # Build SAM project
-      - name: Build with SAM
-        run: sam build --use-container
-
       - name: Prune workspace before SAM build
         run: |
           rm -rf node_modules
@@ -61,6 +57,12 @@ jobs:
           rm -rf tests
           rm -rf .git
           ls -lh
+
+      # Build SAM project
+      - name: Build with SAM
+        run: sam build --use-container
+
+   
 
       # Package SAM template
       - name: Package with SAM
