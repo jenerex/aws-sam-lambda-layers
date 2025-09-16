@@ -12,7 +12,7 @@
     "mongodb": "^6.8.0"      
   },
   "devDependencies": {
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.2", 
     "@types/aws-lambda": "^8.10.144",
     "@types/node": "^20.6.1",
     "@types/mongodb": "^4.0.7"   
