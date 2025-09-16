@@ -43,7 +43,7 @@ Resources:
     Properties:
       FunctionName: auth-signup
       Handler: dist/handlers/auth.signup
-      CodeUri: /dist
+      CodeUri: .
       Layers:
         - !Ref NodeModulesLayer
       Events:
@@ -63,7 +63,7 @@ Resources:
     Properties:
       FunctionName: auth-home
       Handler: dist/handlers/auth.home
-      CodeUri: /dist
+      CodeUri: .
       Layers:
         - !Ref NodeModulesLayer
       Events:
