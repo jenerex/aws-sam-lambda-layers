@@ -1,54 +1,30 @@
-name: CI CD - SAM Deploy
+- name: Install dependencies in Lambda Layer
+  run: |
+    cd layers/nodejs
+    npm ci --only=prod
 
-on:
-  push:
-    branches: [ main ]
+- name: Clean previous SAM build
+  run: rm -rf .aws-sam
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+- name: Build with SAM
+  run: sam build --use-container
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }} 
-          aws-region: ap-south-1
+- name: Package with SAM
+  run: |
+    sam package \
+      --template-file template.yaml \
+      --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} \
+      --output-template-file packaged.yaml
 
-      # Prepare Lambda Layer
-      - name: Install dependencies in Lambda Layer
-        run: |
-          mkdir -p layers/nodejs
-          cp package.json package-lock.json layers/nodejs/
-          cd layers/nodejs
-          npm install --only=production
-
-      # Clean SAM build cache
-      - name: Clean previous SAM build
-        run: rm -rf .aws-sam
-
-      - name: Build with SAM
-        run: sam build --use-container
-
-      - name: Package with SAM
-        run: |
-          sam package \
-            --template-file template.yaml \
-            --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} \
-            --output-template-file packaged.yaml
-
-      - name: Deploy with SAM
-        env:
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-        run: |
-          sam deploy \
-            --template-file packaged.yaml \
-            --stack-name auth-app-prod-v3 \
-            --capabilities CAPABILITY_IAM \
-            --region ap-south-1 \
-            --no-confirm-changeset \
-            --no-fail-on-empty-changeset \
-            --parameter-overrides MongoUriParam="${MONGO_URI}"
+- name: Deploy with SAM
+  env:
+    MONGO_URI: ${{ secrets.MONGO_URI }}
+  run: |
+    sam deploy \
+      --template-file packaged.yaml \
+      --stack-name auth-app-prod-v3 \
+      --capabilities CAPABILITY_IAM \
+      --region ap-south-1 \
+      --parameter-overrides MongoUriParam="${MONGO_URI}" \
+      --no-confirm-changeset \
+      --no-fail-on-empty-changeset
