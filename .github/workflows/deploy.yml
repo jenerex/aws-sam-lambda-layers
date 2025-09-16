@@ -11,14 +11,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }} 
+          aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
 
-      # Prepare Lambda Layer
+      # Install all dependencies for build (including dev)
+      - name: Install dependencies
+        run: npm ci
+
+      # Build TypeScript into dist/
+      - name: Build TypeScript
+        run: npx tsc
+
+      # Prepare Lambda Layer (prod dependencies only)
       - name: Install dependencies in Lambda Layer
         run: |
           mkdir -p layers/nodejs
@@ -26,13 +39,15 @@ jobs:
           cd layers/nodejs
           npm install --only=production
 
-      # Clean SAM build cache
+      # Clean previous SAM build
       - name: Clean previous SAM build
         run: rm -rf .aws-sam
 
+      # Build SAM project
       - name: Build with SAM
         run: sam build --use-container
 
+      # Package SAM template
       - name: Package with SAM
         run: |
           sam package \
@@ -40,6 +55,7 @@ jobs:
             --s3-bucket ${{ secrets.DEPLOY_S3_BUCKET }} \
             --output-template-file packaged.yaml
 
+      # Deploy with SAM
       - name: Deploy with SAM
         env:
           MONGO_URI: ${{ secrets.MONGO_URI }}
