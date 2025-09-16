@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: "Basic Hello World Lambda with API Gateway"
 
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 5
+    MemorySize: 128
+
 Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function
@@ -9,17 +15,25 @@ Resources:
       FunctionName: hello-world
       CodeUri: .
       Handler: index.handler
-      Runtime: nodejs18.x
-      MemorySize: 128
-      Timeout: 5
       Events:
         ApiEvent:
           Type: Api
           Properties:
+            RestApiId: !Ref ServerlessRestApi
             Path: /hello
             Method: get
 
+  # Define the API Gateway explicitly (so we can set stage + CORS)
+  ServerlessRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'OPTIONS,GET'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+
 Outputs:
   ApiUrl:
-    Description: "API Gateway endpoint"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello"
+    Description: "Hello World API endpoint"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/hello"
