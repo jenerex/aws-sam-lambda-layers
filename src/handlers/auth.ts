@@ -5,7 +5,7 @@ import { success, failure } from "../utils/response";
 import { log } from "../utils/logger";
 
 const MONGO_URI = process.env.MONGO_URI;
-const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID;
+const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID; 
 
 /**
  * Signup handler
