@@ -4,7 +4,12 @@
   "description": "Minimal Lambda function",
   "main": "index.js",
   "scripts": {
-    "build": "echo 'No build step required'"
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/aws-lambda": "^8.10.144",
+    "@types/node": "^20.6.1"
   },
   "license": "MIT"
 }
