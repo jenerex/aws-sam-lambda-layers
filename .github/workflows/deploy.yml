@@ -42,7 +42,7 @@ jobs:
           cp package.json package-lock.json layers/nodejs/
           cd layers/nodejs
           npm ci --only=production
-          cd ../..
+          cd ../.. 
           # remove root node_modules to avoid bundling twice
           rm -rf node_modules
 
