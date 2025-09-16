@@ -23,13 +23,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_ACCESS_KEY_SECRET }}
           aws-region: ap-south-1
 
-      - name: Prune workspace before SAM build
-        run: |
-          rm -rf node_modules
-          rm -rf src
-          rm -rf tests
-          rm -rf .git
-          ls -lh
+    
 
       # Install all dependencies for build (including dev)
       - name: Install dependencies
@@ -59,6 +53,14 @@ jobs:
       # Build SAM project
       - name: Build with SAM
         run: sam build --use-container
+
+      - name: Prune workspace before SAM build
+        run: |
+          rm -rf node_modules
+          rm -rf src
+          rm -rf tests
+          rm -rf .git
+          ls -lh
 
       # Package SAM template
       - name: Package with SAM
